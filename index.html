@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-labelledby="game-title">
+      <section class="game-shell">
+        <header class="topbar">
+          <div>
+            <h1 id="game-title">Minesweeper</h1>
+            <p id="status" class="status" aria-live="polite">첫 칸을 열어 게임을 시작하세요.</p>
+          </div>
+          <button id="new-game" class="icon-button" type="button" title="새 게임" aria-label="새 게임">
+            ↻
+          </button>
+        </header>
+
+        <div class="controls" aria-label="게임 설정">
+          <div class="segmented" role="group" aria-label="난이도">
+            <button class="level active" type="button" data-level="beginner">초급</button>
+            <button class="level" type="button" data-level="intermediate">중급</button>
+            <button class="level" type="button" data-level="expert">고급</button>
+          </div>
+          <div class="segmented mode-switch" role="group" aria-label="입력 모드">
+            <button class="mode active" type="button" data-mode="open" title="칸 열기">열기</button>
+            <button class="mode" type="button" data-mode="flag" title="깃발 표시">깃발</button>
+          </div>
+          <div class="stats" aria-label="게임 상태">
+            <span title="남은 지뢰">💣 <strong id="mine-count">10</strong></span>
+            <span title="시간">⏱ <strong id="timer">0</strong></span>
+          </div>
+        </div>
+
+        <div class="board-wrap">
+          <div id="board" class="board" role="grid" aria-label="지뢰찾기 보드"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

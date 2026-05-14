@@ -1,0 +1,265 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #17202a;
+  --muted: #5f6b7a;
+  --line: #cfd7df;
+  --cell: #dce3ea;
+  --cell-hover: #cfd9e3;
+  --open: #f8fafc;
+  --accent: #0f766e;
+  --accent-ink: #ffffff;
+  --danger: #c2410c;
+  --shadow: 0 18px 60px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: var(--ink);
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), transparent 36%),
+    linear-gradient(315deg, rgba(194, 65, 12, 0.1), transparent 30%),
+    var(--bg);
+}
+
+button {
+  font: inherit;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.game-shell {
+  width: min(100%, 760px);
+  padding: 18px;
+  border: 1px solid rgba(207, 215, 223, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow);
+}
+
+.topbar,
+.controls,
+.stats {
+  display: flex;
+  align-items: center;
+}
+
+.topbar {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.status {
+  min-height: 1.35em;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.icon-button {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.icon-button:hover {
+  border-color: var(--accent);
+}
+
+.controls {
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(64px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eef2f6;
+}
+
+.mode-switch {
+  grid-template-columns: repeat(2, minmax(58px, 1fr));
+}
+
+.level,
+.mode {
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.level.active,
+.mode.active {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.stats {
+  gap: 10px;
+}
+
+.stats span {
+  min-width: 86px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.board-wrap {
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #edf1f5;
+}
+
+.board {
+  --cols: 9;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell-size));
+  gap: 3px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  display: grid;
+  place-items: center;
+  border: 1px solid #b8c3ce;
+  border-radius: 4px;
+  color: var(--ink);
+  background: linear-gradient(180deg, #eef3f7, var(--cell));
+  cursor: pointer;
+  font-weight: 800;
+  font-size: calc(var(--cell-size) * 0.46);
+  line-height: 1;
+  user-select: none;
+}
+
+.cell:hover:not(.open):not(.flagged) {
+  background: var(--cell-hover);
+}
+
+.cell.open {
+  border-color: #d7dee6;
+  background: var(--open);
+  cursor: default;
+}
+
+.cell.flagged {
+  color: var(--danger);
+}
+
+.cell.mine.open {
+  color: #ffffff;
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.n1 {
+  color: #2563eb;
+}
+
+.n2 {
+  color: #15803d;
+}
+
+.n3 {
+  color: #dc2626;
+}
+
+.n4 {
+  color: #6d28d9;
+}
+
+.n5 {
+  color: #b45309;
+}
+
+.n6 {
+  color: #0f766e;
+}
+
+.n7 {
+  color: #111827;
+}
+
+.n8 {
+  color: #64748b;
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 10px;
+    place-items: start center;
+  }
+
+  .game-shell {
+    padding: 12px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .mode-switch {
+    width: calc(50% - 6px);
+    min-width: 136px;
+  }
+
+  .stats {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .stats span {
+    flex: 1;
+  }
+}
