@@ -22,6 +22,10 @@ let flaggedCount = 0;
 let seconds = 0;
 let timerId = null;
 let activeCell = null;
+let hintedCells = new Set();
+let pressTimerId = null;
+let pressState = null;
+let suppressNextClick = false;
 
 function createCell(row, col) {
   return {
@@ -46,6 +50,8 @@ function resetGame(nextLevel = levelKey) {
   flaggedCount = 0;
   seconds = 0;
   activeCell = null;
+  hintedCells = new Set();
+  clearPressTimer();
   clearInterval(timerId);
   timerId = null;
   statusEl.textContent = "첫 칸을 열어 게임을 시작하세요.";
@@ -115,6 +121,7 @@ function renderBoard() {
 
 function getCellClass(cell) {
   const classes = ["cell"];
+  if (hintedCells.has(keyOf(cell))) classes.push("hinted");
   if (activeCell?.row === cell.row && activeCell?.col === cell.col) classes.push("selected");
   if (cell.open) classes.push("open");
   if (cell.flagged) classes.push("flagged");
@@ -262,6 +269,7 @@ function checkWin() {
 
 function endGame(won) {
   gameOver = true;
+  clearPressTimer();
   clearInterval(timerId);
   timerId = null;
 
@@ -275,19 +283,53 @@ function endGame(won) {
   renderBoard();
 }
 
-function setActiveCellFromTarget(target) {
+function setActiveCellFromTarget(target, shouldRender = true) {
   const cellEl = target.closest(".cell");
   if (!cellEl) return;
   const row = Number(cellEl.dataset.row);
   const col = Number(cellEl.dataset.col);
   if (activeCell?.row === row && activeCell?.col === col) return;
   activeCell = { row, col };
+  if (shouldRender) renderBoard();
+}
+
+function clearPressTimer() {
+  clearTimeout(pressTimerId);
+  pressTimerId = null;
+}
+
+function clearHints() {
+  if (hintedCells.size === 0) return;
+  hintedCells = new Set();
   renderBoard();
+}
+
+function canPreviewCell(row, col) {
+  const cell = cells[row]?.[col];
+  return Boolean(cell?.open && cell.neighborMines > 0 && !gameOver);
+}
+
+function previewAffectedCells(row, col) {
+  if (!canPreviewCell(row, col)) return false;
+  const affectedCells = getNeighbors(row, col).filter((neighbor) => {
+    const cell = cells[neighbor.row][neighbor.col];
+    return !cell.open && !cell.flagged;
+  });
+
+  if (affectedCells.length === 0) return false;
+  hintedCells = new Set(affectedCells.map(keyOf));
+  renderBoard();
+  return true;
 }
 
 boardEl.addEventListener("click", (event) => {
   const target = event.target.closest(".cell");
   if (!target) return;
+  if (suppressNextClick) {
+    suppressNextClick = false;
+    event.preventDefault();
+    return;
+  }
   setActiveCellFromTarget(target);
   const row = Number(target.dataset.row);
   const col = Number(target.dataset.col);
@@ -311,6 +353,41 @@ boardEl.addEventListener("contextmenu", (event) => {
   toggleFlag(Number(target.dataset.row), Number(target.dataset.col));
 });
 
+boardEl.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) return;
+  const target = event.target.closest(".cell");
+  if (!target) return;
+
+  const row = Number(target.dataset.row);
+  const col = Number(target.dataset.col);
+  if (!canPreviewCell(row, col)) return;
+
+  setActiveCellFromTarget(target, false);
+  clearPressTimer();
+  pressState = { row, col, longPressed: false };
+  target.setPointerCapture?.(event.pointerId);
+  pressTimerId = setTimeout(() => {
+    if (!pressState || pressState.row !== row || pressState.col !== col) return;
+    pressState.longPressed = previewAffectedCells(row, col);
+  }, 420);
+});
+
+boardEl.addEventListener("pointerup", () => {
+  if (!pressState) return;
+  clearPressTimer();
+  if (pressState.longPressed) {
+    suppressNextClick = true;
+    setTimeout(clearHints, 360);
+  }
+  pressState = null;
+});
+
+boardEl.addEventListener("pointercancel", () => {
+  clearPressTimer();
+  pressState = null;
+  clearHints();
+});
+
 boardEl.addEventListener("pointerover", (event) => {
   if (!event.target.closest(".cell")) return;
   setActiveCellFromTarget(event.target);
@@ -324,6 +401,11 @@ boardEl.addEventListener("focusin", (event) => {
 boardEl.addEventListener("pointerleave", () => {
   if (document.activeElement?.closest(".cell")) return;
   activeCell = null;
+  if (pressState) {
+    clearPressTimer();
+    pressState = null;
+  }
+  clearHints();
   renderBoard();
 });
 

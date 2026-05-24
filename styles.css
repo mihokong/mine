@@ -177,7 +177,9 @@ h1 {
   font-weight: 800;
   font-size: calc(var(--cell-size) * 0.46);
   line-height: 1;
+  touch-action: manipulation;
   user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .cell:hover:not(.open):not(.flagged) {
@@ -187,6 +189,12 @@ h1 {
 .cell.selected {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+}
+
+.cell.hinted {
+  animation: cell-nudge 0.42s ease-in-out 2;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.18);
 }
 
 .cell.open {
@@ -235,6 +243,21 @@ h1 {
 
 .n8 {
   color: #64748b;
+}
+
+@keyframes cell-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  35% {
+    transform: translateY(-3px);
+  }
+
+  70% {
+    transform: translateY(2px);
+  }
 }
 
 @media (max-width: 640px) {
