@@ -289,6 +289,24 @@ boardEl.addEventListener("contextmenu", (event) => {
   toggleFlag(Number(target.dataset.row), Number(target.dataset.col));
 });
 
+boardEl.addEventListener("keydown", (event) => {
+  const target = event.target.closest(".cell");
+  if (!target) return;
+
+  const row = Number(target.dataset.row);
+  const col = Number(target.dataset.col);
+
+  if (event.code === "Space") {
+    event.preventDefault();
+    toggleFlag(row, col);
+  }
+
+  if (event.code === "Enter") {
+    event.preventDefault();
+    openCell(row, col);
+  }
+});
+
 newGameBtn.addEventListener("click", () => resetGame());
 
 levelButtons.forEach((button) => {
