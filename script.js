@@ -21,6 +21,7 @@ let openedCount = 0;
 let flaggedCount = 0;
 let seconds = 0;
 let timerId = null;
+let activeCell = null;
 
 function createCell(row, col) {
   return {
@@ -44,6 +45,7 @@ function resetGame(nextLevel = levelKey) {
   openedCount = 0;
   flaggedCount = 0;
   seconds = 0;
+  activeCell = null;
   clearInterval(timerId);
   timerId = null;
   statusEl.textContent = "첫 칸을 열어 게임을 시작하세요.";
@@ -73,6 +75,8 @@ function setActiveMode(nextMode) {
 
 function renderBoard() {
   const { rows, cols } = LEVELS[levelKey];
+  const focusedCell = document.activeElement?.closest(".cell");
+  const shouldRestoreFocus = Boolean(focusedCell && activeCell);
   const gap = 3;
   const maxShellWidth = 1440;
   const outerPadding = window.innerWidth <= 640 ? 20 : 36;
@@ -102,10 +106,16 @@ function renderBoard() {
       boardEl.append(button);
     }
   }
+
+  if (shouldRestoreFocus) {
+    const selector = `.cell[data-row="${activeCell.row}"][data-col="${activeCell.col}"]`;
+    boardEl.querySelector(selector)?.focus({ preventScroll: true });
+  }
 }
 
 function getCellClass(cell) {
   const classes = ["cell"];
+  if (activeCell?.row === cell.row && activeCell?.col === cell.col) classes.push("selected");
   if (cell.open) classes.push("open");
   if (cell.flagged) classes.push("flagged");
   if (cell.mine) classes.push("mine");
@@ -265,9 +275,20 @@ function endGame(won) {
   renderBoard();
 }
 
+function setActiveCellFromTarget(target) {
+  const cellEl = target.closest(".cell");
+  if (!cellEl) return;
+  const row = Number(cellEl.dataset.row);
+  const col = Number(cellEl.dataset.col);
+  if (activeCell?.row === row && activeCell?.col === col) return;
+  activeCell = { row, col };
+  renderBoard();
+}
+
 boardEl.addEventListener("click", (event) => {
   const target = event.target.closest(".cell");
   if (!target) return;
+  setActiveCellFromTarget(target);
   const row = Number(target.dataset.row);
   const col = Number(target.dataset.col);
   const cell = cells[row][col];
@@ -286,25 +307,50 @@ boardEl.addEventListener("contextmenu", (event) => {
   const target = event.target.closest(".cell");
   if (!target) return;
   event.preventDefault();
+  setActiveCellFromTarget(target);
   toggleFlag(Number(target.dataset.row), Number(target.dataset.col));
 });
 
-boardEl.addEventListener("keydown", (event) => {
-  const target = event.target.closest(".cell");
-  if (!target) return;
+boardEl.addEventListener("pointerover", (event) => {
+  if (!event.target.closest(".cell")) return;
+  setActiveCellFromTarget(event.target);
+});
 
-  const row = Number(target.dataset.row);
-  const col = Number(target.dataset.col);
+boardEl.addEventListener("focusin", (event) => {
+  if (!event.target.closest(".cell")) return;
+  setActiveCellFromTarget(event.target);
+});
+
+boardEl.addEventListener("pointerleave", () => {
+  if (document.activeElement?.closest(".cell")) return;
+  activeCell = null;
+  renderBoard();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (!activeCell) return;
+  if (event.repeat) return;
+  const focusedCell = document.activeElement?.closest(".cell");
+  const boardHovered = boardEl.matches(":hover");
+  if (!focusedCell && !boardHovered) return;
 
   if (event.code === "Space") {
     event.preventDefault();
-    toggleFlag(row, col);
+    toggleFlag(activeCell.row, activeCell.col);
   }
 
   if (event.code === "Enter") {
     event.preventDefault();
-    openCell(row, col);
+    openCell(activeCell.row, activeCell.col);
   }
+});
+
+document.addEventListener("keyup", (event) => {
+  if (event.code !== "Space" && event.code !== "Enter") return;
+  const focusedCell = document.activeElement?.closest(".cell");
+  const boardHovered = boardEl.matches(":hover");
+  if (!focusedCell && !boardHovered) return;
+  event.preventDefault();
 });
 
 newGameBtn.addEventListener("click", () => resetGame());
