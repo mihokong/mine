@@ -73,8 +73,16 @@ function setActiveMode(nextMode) {
 
 function renderBoard() {
   const { rows, cols } = LEVELS[levelKey];
-  const viewportSafeSize = Math.floor((Math.min(window.innerWidth, 740) - 44) / cols);
-  const size = Math.max(24, Math.min(42, viewportSafeSize));
+  const gap = 3;
+  const maxShellWidth = 1440;
+  const outerPadding = window.innerWidth <= 640 ? 20 : 36;
+  const shellChrome = window.innerWidth <= 640 ? 42 : 52;
+  const verticalChrome = window.innerWidth <= 640 ? 220 : 190;
+  const availableWidth = Math.min(window.innerWidth - outerPadding, maxShellWidth) - shellChrome;
+  const availableHeight = window.innerHeight - verticalChrome;
+  const sizeByWidth = Math.floor((availableWidth - gap * (cols - 1)) / cols);
+  const sizeByHeight = Math.floor((availableHeight - gap * (rows - 1)) / rows);
+  const size = Math.max(20, Math.min(42, sizeByWidth, sizeByHeight));
 
   boardEl.style.setProperty("--cols", cols);
   boardEl.style.setProperty("--cell-size", `${size}px`);
