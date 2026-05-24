@@ -311,10 +311,7 @@ function canPreviewCell(row, col) {
 
 function previewAffectedCells(row, col) {
   if (!canPreviewCell(row, col)) return false;
-  const affectedCells = getNeighbors(row, col).filter((neighbor) => {
-    const cell = cells[neighbor.row][neighbor.col];
-    return !cell.open && !cell.flagged;
-  });
+  const affectedCells = getNeighbors(row, col);
 
   if (affectedCells.length === 0) return false;
   hintedCells = new Set(affectedCells.map(keyOf));
@@ -354,7 +351,7 @@ boardEl.addEventListener("contextmenu", (event) => {
 });
 
 boardEl.addEventListener("pointerdown", (event) => {
-  if (event.button !== 0) return;
+  if (event.button !== undefined && event.button !== 0) return;
   const target = event.target.closest(".cell");
   if (!target) return;
 
@@ -369,7 +366,7 @@ boardEl.addEventListener("pointerdown", (event) => {
   pressTimerId = setTimeout(() => {
     if (!pressState || pressState.row !== row || pressState.col !== col) return;
     pressState.longPressed = previewAffectedCells(row, col);
-  }, 420);
+  }, 300);
 });
 
 boardEl.addEventListener("pointerup", () => {
