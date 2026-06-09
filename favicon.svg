@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- 둥근 사각형 청록색 배경 -->
-  <rect width="32" height="32" rx="8" fill="#0f766e"/>
+  <!-- 둥근 사각형 빨간색 배경 -->
+  <rect width="32" height="32" rx="8" fill="#dc2626"/>
   <!-- 지뢰 본체 (원) -->
   <circle cx="16" cy="16" r="6" fill="#ffffff"/>
   <!-- 지뢰 핀들 (십자 방향) -->
@@ -16,5 +16,5 @@
     <rect x="22" y="15" width="4" height="2" rx="1" fill="#ffffff"/>
   </g>
   <!-- 지뢰 안의 광택 디테일 -->
-  <circle cx="14.5" cy="14.5" r="1.2" fill="#0f766e"/>
+  <circle cx="14.5" cy="14.5" r="1.2" fill="#dc2626"/>
 </svg>
