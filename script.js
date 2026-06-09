@@ -381,9 +381,10 @@ boardEl.addEventListener("pointerdown", (event) => {
 boardEl.addEventListener("pointerup", () => {
   if (!pressState) return;
   clearPressTimer();
-  if (pressState.longPressed) {
-    suppressNextClick = true;
+  if (!pressState.longPressed) {
+    chordOpen(pressState.row, pressState.col);
   }
+  suppressNextClick = true;
   clearHints();
   pressState = null;
 });
