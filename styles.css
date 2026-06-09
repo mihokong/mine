@@ -192,9 +192,8 @@ h1 {
 }
 
 .cell.hinted {
-  animation: cell-nudge 0.42s ease-in-out 2;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.18);
+  border-color: #d7dee6;
+  background: var(--open);
 }
 
 .cell.open {

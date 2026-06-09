@@ -311,7 +311,12 @@ function canPreviewCell(row, col) {
 
 function previewAffectedCells(row, col) {
   if (!canPreviewCell(row, col)) return false;
-  const affectedCells = getNeighbors(row, col);
+  const affectedCells = getNeighbors(row, col).filter(
+    (neighbor) => {
+      const cell = cells[neighbor.row][neighbor.col];
+      return !cell.open && !cell.flagged;
+    }
+  );
 
   if (affectedCells.length === 0) return false;
   hintedCells = new Set(affectedCells.map(keyOf));
@@ -361,11 +366,15 @@ boardEl.addEventListener("pointerdown", (event) => {
 
   setActiveCellFromTarget(target, false);
   clearPressTimer();
+  
+  const previewed = previewAffectedCells(row, col);
+  if (!previewed) return;
+
   pressState = { row, col, longPressed: false };
   target.setPointerCapture?.(event.pointerId);
   pressTimerId = setTimeout(() => {
     if (!pressState || pressState.row !== row || pressState.col !== col) return;
-    pressState.longPressed = previewAffectedCells(row, col);
+    pressState.longPressed = true;
   }, 300);
 });
 
@@ -374,8 +383,8 @@ boardEl.addEventListener("pointerup", () => {
   clearPressTimer();
   if (pressState.longPressed) {
     suppressNextClick = true;
-    setTimeout(clearHints, 360);
   }
+  clearHints();
   pressState = null;
 });
 
