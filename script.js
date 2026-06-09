@@ -11,12 +11,15 @@ const timerEl = document.querySelector("#timer");
 const newGameBtn = document.querySelector("#new-game");
 const levelButtons = document.querySelectorAll(".level");
 const modeButtons = document.querySelectorAll(".mode");
+const pauseOverlayEl = document.querySelector("#pause-overlay");
+const resumeBtn = document.querySelector("#resume-btn");
 
 let levelKey = "beginner";
 let inputMode = "open";
 let cells = [];
 let started = false;
 let gameOver = false;
+let paused = false;
 let openedCount = 0;
 let flaggedCount = 0;
 let seconds = 0;
@@ -46,6 +49,11 @@ function resetGame(nextLevel = levelKey) {
   );
   started = false;
   gameOver = false;
+  paused = false;
+  if (pauseOverlayEl) {
+    pauseOverlayEl.classList.remove("active");
+    pauseOverlayEl.setAttribute("aria-hidden", "true");
+  }
   openedCount = 0;
   flaggedCount = 0;
   seconds = 0;
@@ -261,6 +269,38 @@ function startTimer() {
   }, 1000);
 }
 
+function pauseGame() {
+  if (!started || gameOver || paused) return;
+  paused = true;
+  clearInterval(timerId);
+  timerId = null;
+  if (pauseOverlayEl) {
+    pauseOverlayEl.classList.add("active");
+    pauseOverlayEl.setAttribute("aria-hidden", "false");
+  }
+  statusEl.textContent = "게임이 일시 정지되었습니다.";
+  setTimeout(() => {
+    resumeBtn?.focus();
+  }, 50);
+}
+
+function resumeGame() {
+  if (!paused) return;
+  paused = false;
+  if (pauseOverlayEl) {
+    pauseOverlayEl.classList.remove("active");
+    pauseOverlayEl.setAttribute("aria-hidden", "true");
+  }
+  startTimer();
+  statusEl.textContent = "지뢰를 피해 모든 칸을 여세요.";
+  if (activeCell) {
+    const selector = `.cell[data-row="${activeCell.row}"][data-col="${activeCell.col}"]`;
+    boardEl.querySelector(selector)?.focus({ preventScroll: true });
+  } else {
+    newGameBtn?.focus();
+  }
+}
+
 function checkWin() {
   const { rows, cols, mines } = LEVELS[levelKey];
   if (openedCount !== rows * cols - mines) return;
@@ -325,6 +365,7 @@ function previewAffectedCells(row, col) {
 }
 
 boardEl.addEventListener("click", (event) => {
+  if (paused) return;
   const target = event.target.closest(".cell");
   if (!target) return;
   if (suppressNextClick) {
@@ -348,6 +389,7 @@ boardEl.addEventListener("click", (event) => {
 });
 
 boardEl.addEventListener("contextmenu", (event) => {
+  if (paused) return;
   const target = event.target.closest(".cell");
   if (!target) return;
   event.preventDefault();
@@ -356,6 +398,7 @@ boardEl.addEventListener("contextmenu", (event) => {
 });
 
 boardEl.addEventListener("pointerdown", (event) => {
+  if (paused) return;
   if (event.button !== undefined && event.button !== 0) return;
   const target = event.target.closest(".cell");
   if (!target) return;
@@ -379,6 +422,7 @@ boardEl.addEventListener("pointerdown", (event) => {
 });
 
 boardEl.addEventListener("pointerup", () => {
+  if (paused) return;
   if (!pressState) return;
   clearPressTimer();
   if (!pressState.longPressed) {
@@ -390,22 +434,26 @@ boardEl.addEventListener("pointerup", () => {
 });
 
 boardEl.addEventListener("pointercancel", () => {
+  if (paused) return;
   clearPressTimer();
   pressState = null;
   clearHints();
 });
 
 boardEl.addEventListener("pointerover", (event) => {
+  if (paused) return;
   if (!event.target.closest(".cell")) return;
   setActiveCellFromTarget(event.target);
 });
 
 boardEl.addEventListener("focusin", (event) => {
+  if (paused) return;
   if (!event.target.closest(".cell")) return;
   setActiveCellFromTarget(event.target);
 });
 
 boardEl.addEventListener("pointerleave", () => {
+  if (paused) return;
   if (document.activeElement?.closest(".cell")) return;
   activeCell = null;
   if (pressState) {
@@ -417,6 +465,7 @@ boardEl.addEventListener("pointerleave", () => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (paused) return;
   if (!activeCell) return;
   if (event.repeat) return;
   const focusedCell = document.activeElement?.closest(".cell");
@@ -435,6 +484,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("keyup", (event) => {
+  if (paused) return;
   if (event.code !== "Space" && event.code !== "Enter") return;
   const focusedCell = document.activeElement?.closest(".cell");
   const boardHovered = boardEl.matches(":hover");
@@ -449,9 +499,20 @@ levelButtons.forEach((button) => {
 });
 
 modeButtons.forEach((button) => {
-  button.addEventListener("click", () => setActiveMode(button.dataset.mode));
+  button.addEventListener("click", () => {
+    if (paused) return;
+    setActiveMode(button.dataset.mode);
+  });
 });
 
 window.addEventListener("resize", renderBoard);
+
+window.addEventListener("blur", pauseGame);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    pauseGame();
+  }
+});
+resumeBtn?.addEventListener("click", resumeGame);
 
 resetGame();

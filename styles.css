@@ -43,6 +43,7 @@ button {
 }
 
 .game-shell {
+  position: relative;
   width: min(100%, 1440px);
   padding: 16px;
   border: 1px solid rgba(207, 215, 223, 0.9);
@@ -289,5 +290,88 @@ h1 {
 
   .stats span {
     flex: 1;
+  }
+}
+
+/* Pause Overlay & Glassmorphism */
+.pause-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(244, 246, 248, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 8px;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.pause-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pause-title {
+  font-size: 2.2rem;
+  font-weight: 850;
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: -0.03em;
+  animation: pause-pulse 2.5s infinite ease-in-out;
+}
+
+.pause-desc {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: 0 0 12px 0;
+  font-weight: 500;
+}
+
+.resume-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resume-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.4);
+  background: #0d655e;
+}
+
+.resume-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
+}
+
+@keyframes pause-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.98);
   }
 }
